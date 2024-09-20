@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   myproj-web:
     build:
@@ -7,11 +5,14 @@ services:
       dockerfile: Dockerfile
     container_name: myproj-webapi
     ports:
-      - "4040:8080"
-      - "8081:8081"
+      - "7777:8080"
+      - "443:443"  # HTTPS port qo'shilmoqda
     networks:
       - myproj-network
-    restart: always    
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+     
 
 networks:
   myproj-network:
