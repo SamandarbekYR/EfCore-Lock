@@ -15,7 +15,6 @@ namespace MyProj.WebApi.Repository
         private readonly IMapper _mapper;
         private IDbContextTransaction _dbTransaction;
         public ProductRepository(AppDbContext context, IMapper mapper )
-                               
         {
             _context = context;
             _dbSet = context.Set<Product>();
@@ -25,7 +24,6 @@ namespace MyProj.WebApi.Repository
         public async Task<bool> AddProductAsync(AddProductDto product)
         {
             _dbTransaction = await _context.Database.BeginTransactionAsync(System.Data.IsolationLevel.RepeatableRead);
-
             await _context.Database.ExecuteSqlRawAsync($"LOCK TABLE \"Products\" IN EXCLUSIVE MODE;");
 
             var existingProduct = await _dbSet
@@ -41,8 +39,8 @@ namespace MyProj.WebApi.Repository
             var mapProduct = _mapper.Map<Product>(product);
             await _dbSet.AddAsync(mapProduct);
             await _context.SaveChangesAsync();
-
             await _dbTransaction.CommitAsync();
+            
             return true;
         }
 
