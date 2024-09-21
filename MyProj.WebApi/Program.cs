@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.RateLimiting;
 using MyProj.WebApi.Configurations;
 using MyProj.WebApi.Interfaces;
 using MyProj.WebApi.Mapper;
@@ -14,6 +15,18 @@ builder.Services.AddScoped<IProductService, ProductServcie>();
 builder.Services.AddTransient<IProductRepository, ProductRepository>();
 builder.Services.AddCustomDbContext(builder.Configuration);
 builder.Services.AddAutoMapper(typeof(MapperProfile));
+
+builder.Services.AddRateLimiter(x =>
+{
+    x.RejectionStatusCode = 429;
+    x.AddSlidingWindowLimiter("sliding", options =>
+    {
+        options.Window = TimeSpan.FromSeconds(1);
+        options.SegmentsPerWindow = 3;
+        options.PermitLimit = 5;
+        options.QueueLimit = 3;
+    });
+});
 var app = builder.Build();
 
 app.UseSwagger();
@@ -22,7 +35,7 @@ app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
-
-app.MapControllers();
+app.UseRateLimiter();
+app.MapControllers().RequireRateLimiting("sliding"); 
 
 app.Run();
